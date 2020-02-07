@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View, Image } from 'react-native';
 
 import MySectionList from './index';
@@ -29,11 +29,14 @@ const data = [
       { id: 't6', title: 'Go to the Gym' },
     ],
   },
+  {
+    noteId: 'n3',
+    noteTitle: 'ASAP',
+    data: [],
+  },
 ];
 
-const HEADER_MARGIN = 15;
-const HEADER_HEIGHT = 20;
-const ITEM_MARGIN_BOTTOM = 0;
+const HEADER_HEIGHT = 20 + 35 + 15;
 const ITEM_HEIGHT = 24 + 17 * 2;
 
 function Item({ title, draggableItem }) {
@@ -57,13 +60,37 @@ function DraggableItem() {
 }
 
 function SectionListContainer() {
+  const [sections, setSections] = useState(data);
+
+  function handleDrop({ section, item }, selectedSectionId) {
+    setSections(sections =>
+      sections.map(sectionValue => {
+        if (sectionValue.noteId === section.noteId) {
+          const index = sectionValue.data.findIndex(v => v.id === item.id);
+          return {
+            ...sectionValue,
+            data: [
+              ...sectionValue.data.slice(0, index),
+              ...sectionValue.data.slice(index + 1),
+            ],
+          };
+        } else if (sectionValue.noteId === selectedSectionId) {
+          return {
+            ...sectionValue,
+            data: [item, ...sectionValue.data],
+          };
+        } else {
+          return sectionValue;
+        }
+      })
+    );
+  }
+
   return (
     <MySectionList
       headerHeight={HEADER_HEIGHT}
-      headerMarginTop={HEADER_MARGIN}
       itemHeight={ITEM_HEIGHT}
-      itemMarginBottom={ITEM_MARGIN_BOTTOM}
-      sections={data}
+      sections={sections}
       keyExtractorItem={item => item.id}
       keyExtractorSection={section => section.noteId}
       draggableItem={<DraggableItem />}
@@ -73,15 +100,29 @@ function SectionListContainer() {
       )}
       renderSectionHeader={(
         highlightedSectionId,
+        selectedItemsectionId,
         { section: { noteTitle, noteId, data } }
       ) => (
         <View style={styles.headerContainer}>
-          <Text style={styles.headerText}>
-            {noteTitle.toUpperCase()} ({data.length}){' '}
-            {highlightedSectionId === noteId && 'Highlighted'}
+          <Text
+            style={[
+              styles.headerText,
+              highlightedSectionId === noteId &&
+                selectedItemsectionId !== noteId &&
+                styles.headerHighlighted,
+            ]}
+          >
+            {noteTitle.toUpperCase()} ({data.length})
           </Text>
+          {highlightedSectionId === noteId && selectedItemsectionId !== noteId && (
+            <Image
+              style={styles.addIcon}
+              source={require('../../assets/Global/Plus-Circle.png')}
+            />
+          )}
         </View>
       )}
+      onDrop={handleDrop}
     />
   );
 }
@@ -89,20 +130,22 @@ function SectionListContainer() {
 const styles = StyleSheet.create({
   screen: {},
   headerContainer: {
-    height: 60,
     flexDirection: 'row',
-    alignItems: 'center',
+    height: HEADER_HEIGHT,
     marginHorizontal: 16,
     paddingHorizontal: 24,
-    marginTop: HEADER_MARGIN,
-    paddingVertical: 15,
-    borderWidth: 1,
-    // borderBottomWidth: 1,
-    // borderBottomColor: '#E6E6E6',
+    paddingTop: 35,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E6E6E6',
   },
   headerText: {
     fontSize: 14,
     color: '#737373',
+  },
+  headerHighlighted: {
+    fontSize: 16,
+    color: 'skyblue',
   },
   itemContainer: {
     flexDirection: 'row',
@@ -122,6 +165,7 @@ const styles = StyleSheet.create({
   draggableItem: {
     tintColor: '#A73CBD',
   },
+  addIcon: { tintColor: 'skyblue' },
   draggableItemContainer: {
     marginRight: 6,
   },

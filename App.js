@@ -8,7 +8,7 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ backgroundColor: 'peachpuff', height: '10%' }}></View>
-      <View style={{ flexDirection: 'row', backgroundColor: 'skyblue', flex: 1 }}>
+      <View style={{ flexDirection: 'row', flex: 1 }}>
         <View style={{ backgroundColor: 'yellowgreen', width: '10%' }}></View>
         <View style={{ backgroundColor: 'white' }}>
           <DragAndDropSectionList />
